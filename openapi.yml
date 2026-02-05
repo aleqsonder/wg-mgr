@@ -1,0 +1,49 @@
+openapi: "3.0.3"
+info:
+  title: WireGuard Manager
+  version: "0.1"
+paths:
+  /users/{userId}:
+    get:
+      summary: Get an existing user
+      operationId: getUserById
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user to return
+          required: true
+          schema:
+            $ref: "#/components/schemas/UserId"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+components:
+  schemas:
+    UserId:
+      description: ID of a user
+      type: integer
+      format: uint64
+
+    User:
+      description: Info of a user
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/UserId"
+        username:
+          type: string
+          pattern: "^[a-zA-Z0-9_-]{3,20}$"
+        contacts:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+      required:
+        - id
+        - username
