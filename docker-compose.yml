@@ -1,10 +1,19 @@
 services:
-  gen-spring:
+  spring:
     build:
-      context: .
-      dockerfile: gen-spring.dockerfile
+      context: backend
+      dockerfile: Dockerfile
     ports:
       - 80:8080
+    depends_on:
+      - db
+
+  gen-spring:
+    build:
+      context: . 
+      dockerfile: gen-spring.dockerfile
+    ports:
+      - 90:8080
 
   db:
     image: postgres:14.20-trixie
