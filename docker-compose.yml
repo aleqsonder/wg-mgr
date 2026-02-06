@@ -4,4 +4,24 @@ services:
       context: .
       dockerfile: dockerfile
     ports:
+      - 80:8080
+
+  db:
+    image: postgres:14.20-trixie
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB=vpn
+      - PGDATA=/var/lib/pgsql
+    volumes:
+      - ./initdb.d:/docker-entrypoint-initdb.d
+      - data:/var/lib/pgsql
+
+  db-adminer:
+    image: adminer
+    restart: always
+    ports:
       - 8080:8080
+
+volumes:
+  data:
