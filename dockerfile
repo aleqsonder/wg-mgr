@@ -5,8 +5,9 @@ RUN openapi-generator-cli generate -i openapi.yml -g spring -o /gen/server
 
 FROM maven:3.9-eclipse-temurin-21 AS builder
 WORKDIR /app
-COPY --from=gen /gen/server .
+COPY --from=gen /gen/server/pom.xml .
 RUN mvn -B dependency:go-offline
+COPY --from=gen /gen/server/src .
 RUN mvn -B clean package -DskipTests
 
 FROM eclipse-temurin:21-jre-jammy AS runtime
