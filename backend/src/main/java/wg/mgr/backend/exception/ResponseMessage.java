@@ -1,6 +1,6 @@
 package wg.mgr.backend.exception;
 
-public record RequestMessage(
+public record ResponseMessage(
         Integer code,
         String message
 ) {
