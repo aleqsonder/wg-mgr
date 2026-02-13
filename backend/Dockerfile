@@ -1,12 +1,12 @@
-FROM maven:3.9-eclipse-temurin-25
-
+FROM maven:3.9-eclipse-temurin-25 AS builder
 WORKDIR /app
-
-# Копируем pom.xml отдельно, чтобы Maven мог закешировать зависимости
 COPY pom.xml .
+RUN mvn -B dependency:go-offline
+COPY src src
+RUN mvn -B clean package -DskipTests
 
-RUN mvn -q dependency:go-offline
-
-# Исходники будут примонтированы через volume, поэтому копировать их не нужно
-
-ENTRYPOINT ["sh", "-c", "mvn -q clean package -DskipTests && java -jar target/*.jar"]
+FROM eclipse-temurin:25-jre-jammy AS runtime
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT [ "java", "-jar", "app.jar" ]
