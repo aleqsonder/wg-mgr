@@ -1,4 +1,4 @@
-package wg.mgr.backend.exception;
+package wg.mgr.backend.dto;
 
 public record ResponseMessage(
         Integer code,
