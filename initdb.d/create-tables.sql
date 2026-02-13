@@ -10,17 +10,10 @@ CREATE TABLE contact_types (
 );
 
 CREATE TABLE vpn_user_contacts (
-	vpn_user_id BIGINT REFERENCES vpn_users(id),
+	vpn_user_id BIGINT REFERENCES vpn_users(id) ON DELETE CASCADE,
 	contact_type_id BIGINT REFERENCES contact_types(id),
 	content TEXT NOT NULL,
 	PRIMARY KEY (vpn_user_id, contact_type_id)
-);
-
-CREATE TABLE vpn_user_contacts (
-                                   vpn_user_id BIGINT REFERENCES vpn_users(id),
-                                   contact_type_id VARCHAR,
-                                   content TEXT NOT NULL,
-                                   PRIMARY KEY (vpn_user_id, contact_type_id)
 );
 
 CREATE TABLE vpn_servers (
@@ -31,8 +24,8 @@ CREATE TABLE vpn_servers (
 
 CREATE TABLE devices (
 	id BIGSERIAL PRIMARY KEY,
-	vpn_server_id BIGINT REFERENCES vpn_servers(id) NOT NULL,
-	vpn_user_id BIGINT REFERENCES vpn_users(id) NOT NULL,
+	vpn_server_id BIGINT NOT NULL REFERENCES vpn_servers(id),
+	vpn_user_id BIGINT NOT NULL REFERENCES vpn_users(id) ON DELETE CASCADE,
 	device_name VARCHAR(64) NOT NULL,
 	notes TEXT,
 	ipv4 VARCHAR(15) NOT NULL,
