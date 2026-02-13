@@ -1,11 +1,13 @@
 package wg.mgr.backend.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import wg.mgr.backend.exception.ConflictVpnException;
+import wg.mgr.backend.exception.NotFoundVpnException;
 import wg.mgr.backend.model.VpnUser;
 import wg.mgr.backend.repository.VpnUserRepository;
 
-import java.util.Optional;
-
+@Slf4j
 @Service
 public class VpnUserService {
 
@@ -16,40 +18,33 @@ public class VpnUserService {
     }
 
     public VpnUser add(VpnUser vpnUser) {
-        // may be validation and some logic
+        if (vpnUserRepository.existsByUsername(vpnUser.getUsername())) {
+            throw new ConflictVpnException("User with username " + vpnUser.getUsername() + " already exists");
+        }
         return vpnUserRepository.save(vpnUser);
     }
 
-    public VpnUser edit(Long vpnUserId, VpnUser vpnUser) {
-        // may be validation and some logic
-        Optional<VpnUser> maybeUser = vpnUserRepository.findById(vpnUserId);
-        if (maybeUser.isEmpty()) {
-            // TODO custom exception later
-            throw new RuntimeException("User with id " + vpnUserId + " not found");
-        } else {
-            VpnUser userToUpdate = maybeUser.get();
-            userToUpdate.setUsername(vpnUser.getUsername());
-            return vpnUserRepository.save(userToUpdate);
+    public VpnUser edit(Long vpnUserId, VpnUser update) {
+        if (vpnUserRepository.existsByUsername(update.getUsername())) {
+            throw new ConflictVpnException("User with username " + update.getUsername() + " already exists");
         }
+        VpnUser userToUpdate = vpnUserRepository.findById(vpnUserId).orElseThrow(
+                () -> new NotFoundVpnException("User with id " + vpnUserId + " not found")
+        );
+        userToUpdate.setUsername(update.getUsername());
+        return vpnUserRepository.save(userToUpdate);
     }
 
     public VpnUser getById(Long vpnUserId) {
-        Optional<VpnUser> maybeUser = vpnUserRepository.findById(vpnUserId);
-        if (maybeUser.isPresent()) {
-            return maybeUser.get();
-        } else {
-            // TODO custom exception later
-            throw new RuntimeException("User with id " + vpnUserId + " not found");
-        }
+        return vpnUserRepository.findById(vpnUserId).orElseThrow(
+                () -> new NotFoundVpnException("User with id " + vpnUserId + " not found")
+        );
     }
 
     public void delete(Long vpnUserId) {
-        Optional<VpnUser> maybeUser = vpnUserRepository.findById(vpnUserId);
-        if (maybeUser.isPresent()) {
-            vpnUserRepository.deleteById(vpnUserId);
-        } else {
-            // TODO custom exception later
-            throw new RuntimeException("User with id " + vpnUserId + " not found");
-        }
+        VpnUser userToDelete = vpnUserRepository.findById(vpnUserId).orElseThrow(
+                () -> new NotFoundVpnException("User with id " + vpnUserId + " not found")
+        );
+        vpnUserRepository.delete(userToDelete);
     }
 }

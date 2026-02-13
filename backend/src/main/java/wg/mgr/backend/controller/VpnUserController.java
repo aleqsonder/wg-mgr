@@ -3,7 +3,7 @@ package wg.mgr.backend.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import wg.mgr.backend.exception.ResponseMessage;
+import wg.mgr.backend.dto.ResponseMessage;
 import wg.mgr.backend.model.VpnUser;
 import wg.mgr.backend.service.VpnUserService;
 
