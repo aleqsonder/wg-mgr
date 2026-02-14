@@ -1,13 +1,28 @@
 services:
+  spring:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    ports:
+      - "80:8177"
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB=vpn
+    depends_on:
+      - db
+
   gen-spring:
     build:
       context: .
-      dockerfile: gen-spring.dockerfile
+      dockerfile: gen-spring.dockerfile 
     ports:
-      - 80:8080
+      - "90:8080"
 
   db:
-    image: postgres:14.20-trixie
+    image: postgres:18
+    ports:
+      - "5444:5432"
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -19,9 +34,9 @@ services:
 
   db-adminer:
     image: adminer
-    restart: always
+    restart: no
     ports:
-      - 8080:8080
+      - "8080:8080"
 
 volumes:
   data:
