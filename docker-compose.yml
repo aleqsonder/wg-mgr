@@ -1,8 +1,8 @@
 services:
-  backend:
+  gen-spring:
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: gen-spring.dockerfile
     ports:
       - 80:8080
 

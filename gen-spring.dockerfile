@@ -1,4 +1,4 @@
-FROM openapitools/openapi-generator-cli as gen
+FROM openapitools/openapi-generator-cli AS gen
 WORKDIR /gen
 COPY openapi.yml .
 RUN openapi-generator-cli generate -i openapi.yml -g spring -o /gen/server
