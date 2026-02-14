@@ -12,10 +12,10 @@ services:
     depends_on:
       - db
 
-  generated-backend:
+  gen-spring:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: gen-spring.dockerfile 
     ports:
       - "90:8080"
 
