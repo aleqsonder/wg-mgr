@@ -17,10 +17,10 @@ public class VpnUserContactId implements Serializable {
     @Serial
     private static final long serialVersionUID = -3611598089320037380L;
     @Column(name = "vpn_user_id", nullable = false)
-    private Integer vpnUserId;
+    private Long vpnUserId;
 
     @Column(name = "contact_type_id", nullable = false)
-    private Integer contactTypeId;
+    private Long contactTypeId;
 
 
 }

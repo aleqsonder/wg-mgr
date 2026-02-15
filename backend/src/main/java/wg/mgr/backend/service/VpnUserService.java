@@ -1,10 +1,21 @@
 package wg.mgr.backend.service;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import wg.mgr.backend.dto.ContactRequest;
+import wg.mgr.backend.dto.ContactResponse;
+import wg.mgr.backend.dto.UserWithContactsRequest;
+import wg.mgr.backend.dto.UserWithContactsResponse;
 import wg.mgr.backend.exception.ConflictVpnException;
 import wg.mgr.backend.exception.NotFoundVpnException;
+import wg.mgr.backend.exception.ServerVpnException;
+import wg.mgr.backend.model.ContactType;
 import wg.mgr.backend.model.VpnUser;
+import wg.mgr.backend.model.VpnUserContact;
+import wg.mgr.backend.model.VpnUserContactId;
+import wg.mgr.backend.repository.ContactTypeRepository;
+import wg.mgr.backend.repository.VpnUserContactRepository;
 import wg.mgr.backend.repository.VpnUserRepository;
 
 @Slf4j
@@ -12,16 +23,51 @@ import wg.mgr.backend.repository.VpnUserRepository;
 public class VpnUserService {
 
     private final VpnUserRepository vpnUserRepository;
+    private final ContactTypeRepository contactTypeRepository;
+    private final VpnUserContactRepository vpnUserContactRepository;
 
-    public VpnUserService(VpnUserRepository vpnUserRepository) {
+    public VpnUserService(VpnUserRepository vpnUserRepository, ContactTypeRepository contactTypeRepository, VpnUserContactRepository vpnUserContactRepository) {
         this.vpnUserRepository = vpnUserRepository;
+        this.contactTypeRepository = contactTypeRepository;
+        this.vpnUserContactRepository = vpnUserContactRepository;
     }
 
-    public VpnUser add(VpnUser vpnUser) {
-        if (vpnUserRepository.existsByUsername(vpnUser.getUsername())) {
-            throw new ConflictVpnException("User with username " + vpnUser.getUsername() + " already exists");
+    @Transactional
+    public UserWithContactsResponse add(UserWithContactsRequest userWithContacts) {
+
+        if (vpnUserRepository.existsByUsername(userWithContacts.username())) {
+            throw new ConflictVpnException("User with username " + userWithContacts.username() + " already exists");
         }
-        return vpnUserRepository.save(vpnUser);
+        VpnUser vpnUser = new VpnUser();
+        vpnUser.setUsername(userWithContacts.username());
+        vpnUser = vpnUserRepository.save(vpnUser);
+
+        for (ContactRequest contactRequest : userWithContacts.contacts()) {
+            ContactType contactType = contactTypeRepository.findByTypename(contactRequest.contactType())
+                    .orElseThrow(() -> new ServerVpnException("This type of contact no longer exists."));
+
+            VpnUserContact vpnUserContact = new VpnUserContact();
+            vpnUserContact.setVpnUser(vpnUser);
+            vpnUserContact.setContactType(contactType);
+            vpnUserContact.setContent(contactRequest.content());
+
+            VpnUserContactId vpnUserContactId = new VpnUserContactId();
+            vpnUserContactId.setVpnUserId(vpnUser.getId());
+            vpnUserContactId.setContactTypeId(contactType.getId());
+
+            vpnUserContact.setId(vpnUserContactId);
+            vpnUserContact = vpnUserContactRepository.save(vpnUserContact);
+            vpnUser.getVpnUserContacts().add(vpnUserContact);
+        }
+        return new UserWithContactsResponse(
+                vpnUser.getId(),
+                vpnUser.getUsername(),
+                vpnUser.getVpnUserContacts().stream().map(vpnUserContact ->
+                    new ContactResponse(
+                            vpnUserContact.getContactType().getTypename(),
+                            vpnUserContact.getContent())
+                ).toList()
+        );
     }
 
     public VpnUser edit(Long vpnUserId, VpnUser update) {

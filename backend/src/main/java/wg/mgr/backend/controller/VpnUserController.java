@@ -1,9 +1,11 @@
 package wg.mgr.backend.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import wg.mgr.backend.dto.ResponseMessage;
+import wg.mgr.backend.dto.UserWithContactsRequest;
+import wg.mgr.backend.dto.UserWithContactsResponse;
 import wg.mgr.backend.model.VpnUser;
 import wg.mgr.backend.service.VpnUserService;
 
@@ -18,7 +20,7 @@ public class VpnUserController {
     }
 
     @PostMapping
-    public ResponseEntity<VpnUser> addVpnUser(@RequestBody VpnUser vpnUser) {
+    public ResponseEntity<UserWithContactsResponse> addVpnUser(@RequestBody @Valid UserWithContactsRequest vpnUser) {
         return ResponseEntity.status(HttpStatus.CREATED).body(vpnUserService.add(vpnUser));
     }
 
@@ -33,12 +35,9 @@ public class VpnUserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<ResponseMessage> deleteUser(@PathVariable Long userId) {
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         vpnUserService.delete(userId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseMessage(
-                204,
-                "Successfully deleted user with id: " + userId
-        ));
+        return ResponseEntity.noContent().build();
     }
 
 }
