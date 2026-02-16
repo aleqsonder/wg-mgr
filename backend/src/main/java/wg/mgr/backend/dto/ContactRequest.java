@@ -13,7 +13,7 @@ public record ContactRequest(
 
         @JsonProperty(required = true)
         @NotNull(message = "Contact content is required")
-        @NotBlank
+        @NotBlank(message = "Contact content must not be blank")
         String content
 ) {
 }
