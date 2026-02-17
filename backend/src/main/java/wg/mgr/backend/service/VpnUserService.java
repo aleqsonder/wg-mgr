@@ -26,10 +26,26 @@ public class VpnUserService {
     private final ContactTypeRepository contactTypeRepository;
     private final VpnUserContactRepository vpnUserContactRepository;
 
-    public VpnUserService(VpnUserRepository vpnUserRepository, ContactTypeRepository contactTypeRepository, VpnUserContactRepository vpnUserContactRepository) {
+    public VpnUserService(
+            VpnUserRepository vpnUserRepository,
+            ContactTypeRepository contactTypeRepository,
+            VpnUserContactRepository vpnUserContactRepository
+    ) {
         this.vpnUserRepository = vpnUserRepository;
         this.contactTypeRepository = contactTypeRepository;
         this.vpnUserContactRepository = vpnUserContactRepository;
+    }
+
+    private UserWithContactsResponse vpnUserToResponse(VpnUser vpnUser) {
+        return new UserWithContactsResponse(
+                vpnUser.getId(),
+                vpnUser.getUsername(),
+                vpnUser.getVpnUserContacts().stream().map(vpnUserContact ->
+                        new ContactResponse(
+                                vpnUserContact.getContactType().getTypename(),
+                                vpnUserContact.getContent())
+                ).toList()
+        );
     }
 
     @Transactional
@@ -59,32 +75,26 @@ public class VpnUserService {
             vpnUserContact = vpnUserContactRepository.save(vpnUserContact);
             vpnUser.getVpnUserContacts().add(vpnUserContact);
         }
-        return new UserWithContactsResponse(
-                vpnUser.getId(),
-                vpnUser.getUsername(),
-                vpnUser.getVpnUserContacts().stream().map(vpnUserContact ->
-                    new ContactResponse(
-                            vpnUserContact.getContactType().getTypename(),
-                            vpnUserContact.getContent())
-                ).toList()
-        );
+        return vpnUserToResponse(vpnUser);
     }
 
-    public VpnUser edit(Long vpnUserId, VpnUser update) {
-        if (vpnUserRepository.existsByUsername(update.getUsername())) {
-            throw new ConflictVpnException("User with username " + update.getUsername() + " already exists");
+    public UserWithContactsResponse edit(Long vpnUserId, UserWithContactsRequest update) {
+        if (vpnUserRepository.existsByUsername(update.username())) {
+            throw new ConflictVpnException("User with username " + update.username() + " already exists");
         }
         VpnUser userToUpdate = vpnUserRepository.findById(vpnUserId).orElseThrow(
                 () -> new NotFoundVpnException("User with id " + vpnUserId + " not found")
         );
-        userToUpdate.setUsername(update.getUsername());
-        return vpnUserRepository.save(userToUpdate);
+        userToUpdate.setUsername(update.username());
+        VpnUser updated =  vpnUserRepository.save(userToUpdate);
+        return vpnUserToResponse(updated);
     }
 
-    public VpnUser getById(Long vpnUserId) {
-        return vpnUserRepository.findById(vpnUserId).orElseThrow(
+    public UserWithContactsResponse getById(Long vpnUserId) {
+        VpnUser foundUser = vpnUserRepository.findById(vpnUserId).orElseThrow(
                 () -> new NotFoundVpnException("User with id " + vpnUserId + " not found")
         );
+        return vpnUserToResponse(foundUser);
     }
 
     public void delete(Long vpnUserId) {
