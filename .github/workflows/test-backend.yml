@@ -1,0 +1,16 @@
+name: backend testing
+on: [pull_request]
+jobs:
+  test-spring:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Install JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Module tests for the Spring backend service
+        run: mvn -ff -e -Dtest=VpnUserServiceTest test
+        working-directory: backend
