@@ -8,7 +8,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import wg.mgr.backend.dto.UserWithContactsRequest;
 import wg.mgr.backend.dto.UserWithContactsResponse;
-import wg.mgr.backend.model.VpnUser;
 import wg.mgr.backend.service.VpnUserService;
 
 @RestController
@@ -32,7 +31,7 @@ public class VpnUserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<VpnUser> addVpnUser(
+    public ResponseEntity<UserWithContactsResponse> getVpnUserById(
             @PathVariable
             @Min(value = 0, message = "userId must be >= 0")
             Long userId
@@ -41,12 +40,13 @@ public class VpnUserController {
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<VpnUser> editUser(
+    public ResponseEntity<UserWithContactsResponse> editUser(
             @PathVariable
             @Min(value = 0, message = "userId must be >= 0")
             Long userId,
             @RequestBody
-            VpnUser vpnUser
+            @Valid
+            UserWithContactsRequest vpnUser
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(vpnUserService.edit(userId, vpnUser));
     }
