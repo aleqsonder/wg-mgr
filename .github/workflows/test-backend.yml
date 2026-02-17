@@ -1,14 +1,11 @@
-name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions
-on: [push]
+name: backend testing
+on: [pull_request]
 jobs:
   test-spring:
     runs-on: ubuntu-latest
     steps: 
-      - name: Debug paths
-        run: |
-          pwd
-          ls -R
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Install maven
         run: sudo apt update && sudo apt install -y maven
       - name: Module tests for the Spring backend service
