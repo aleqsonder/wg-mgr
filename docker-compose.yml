@@ -4,7 +4,7 @@ services:
       context: frontend
       dockerfile: Dockerfile
     ports:
-      - "80:5173"
+      - 80:5173
     environment:
       - VITE_API_HOST=spring
       - VITE_API_PORT=8177
@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: gen-spring.dockerfile 
     ports:
-      - "90:8080"
+      - 90:8080
 
   db:
     image: postgres:18
@@ -37,14 +37,14 @@ services:
       - POSTGRES_DB=vpn
       - PGDATA=/var/lib/pgsql
     volumes:
-      - ./initdb.d:/docker-entrypoint-initdb.d
-      - data:/var/lib/pgsql
+      - ./initdb.d:/docker-entrypoing-initdb.d
+      - pgdata:/var/lib/pgsql
 
   db-adminer:
     image: adminer
     restart: no
     ports:
-      - "8080:8080"
+      - 8080:8080
 
 volumes:
-  data:
+  pgdata:

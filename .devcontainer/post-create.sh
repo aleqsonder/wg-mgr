@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cd backend
-mvn -B dependency:go-offline
+mvn -B -f backend/pom.xml dependency:go-offline
+cd frontend && npm install
