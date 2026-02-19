@@ -10,6 +10,8 @@ import wg.mgr.backend.dto.UserWithContactsRequest;
 import wg.mgr.backend.dto.UserWithContactsResponse;
 import wg.mgr.backend.service.VpnUserService;
 
+import java.util.List;
+
 @RestController
 @Validated
 @RequestMapping("/users")
@@ -37,6 +39,11 @@ public class VpnUserController {
             Long userId
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(vpnUserService.getById(userId));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserWithContactsResponse>> getVpnUsers() {
+        return ResponseEntity.status(HttpStatus.OK).body(vpnUserService.getAll());
     }
 
     @PutMapping("/{userId}")

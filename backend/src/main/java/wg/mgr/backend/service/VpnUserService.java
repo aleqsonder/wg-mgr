@@ -18,6 +18,8 @@ import wg.mgr.backend.repository.ContactTypeRepository;
 import wg.mgr.backend.repository.VpnUserContactRepository;
 import wg.mgr.backend.repository.VpnUserRepository;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class VpnUserService {
@@ -95,6 +97,11 @@ public class VpnUserService {
                 () -> new NotFoundVpnException("User with id " + vpnUserId + " not found")
         );
         return vpnUserToResponse(foundUser);
+    }
+
+    public List<UserWithContactsResponse> getAll() {
+        List<VpnUser> vpnUsers = vpnUserRepository.findAll();
+        return vpnUsers.stream().map(this::vpnUserToResponse).toList();
     }
 
     public void delete(Long vpnUserId) {
