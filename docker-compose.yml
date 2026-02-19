@@ -1,10 +1,20 @@
 services:
+  react:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:5173"
+    environment:
+      - VITE_API_HOST=spring
+      - VITE_API_PORT=8177
+    depends_on:
+      - spring
+
   spring:
     build:
       context: backend
       dockerfile: Dockerfile
-    ports:
-      - "80:8177"
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -21,8 +31,6 @@ services:
 
   db:
     image: postgres:18
-    ports:
-      - "5444:5432"
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
