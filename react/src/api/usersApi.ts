@@ -2,7 +2,7 @@ import type {UserContactResponse, UserRequest, UserResponse} from "../types/user
 import type {ResponseMessage} from "../types/responseMessages.ts";
 
 
-function isUserContactResponse(obj: unknown): obj is UserContactResponse {
+export function isUserContactResponse(obj: unknown): obj is UserContactResponse {
     if (typeof obj !== "object" || obj === null) return false;
 
     const o = obj as Record<string, unknown>;
@@ -13,7 +13,7 @@ function isUserContactResponse(obj: unknown): obj is UserContactResponse {
     );
 }
 
-function isUserResponse(obj: unknown): obj is UserResponse {
+export function isUserResponse(obj: unknown): obj is UserResponse {
     if (typeof obj !== "object" || obj === null) return false;
 
     const o = obj as Record<string, unknown>;
@@ -26,11 +26,11 @@ function isUserResponse(obj: unknown): obj is UserResponse {
     );
 }
 
-function isUserResponseArray(data: unknown): data is UserResponse[] {
+export function isUserResponseArray(data: unknown): data is UserResponse[] {
     return Array.isArray(data) && data.every(isUserResponse);
 }
 
-function isResponseMessage(obj: unknown): obj is ResponseMessage {
+export function isResponseMessage(obj: unknown): obj is ResponseMessage {
     if (typeof obj !== "object" || obj === null) return false;
 
     const o = obj as Record<string, unknown>;
@@ -155,5 +155,79 @@ export async function createUser(
         };
     }
 }
+
+export async function deleteUser(id: number): Promise<ResponseMessage | { success: true }> {
+    try {
+        const response = await fetch(`/api/users/${id}`, {
+            method: "DELETE"
+        });
+
+        // 204 No Content → тело отсутствует, json() вызывать нельзя
+        if (response.status === 204) {
+            return { success: true };
+        }
+
+        // Если сервер вернул ошибку с телом
+        const data: unknown = await response.json().catch(() => null);
+
+        if (isResponseMessage(data)) {
+            return data;
+        }
+
+        return {
+            code: response.status,
+            message: "Unexpected server error"
+        };
+
+    } catch (err: unknown) {
+        return {
+            code: 0,
+            message: err instanceof Error ? err.message : "Unknown network error"
+        };
+    }
+}
+
+export async function editUser(
+    id: number,
+    payload: UserRequest
+): Promise<UserResponse | ResponseMessage> {
+    try {
+        const response = await fetch(`/api/users/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        const data: unknown = await response.json().catch(() => null);
+
+        if (response.ok) {
+            if (isUserResponse(data)) {
+                return data;
+            }
+
+            return {
+                code: 500,
+                message: "Invalid user format"
+            };
+        }
+
+        if (isResponseMessage(data)) {
+            return data;
+        }
+
+        return {
+            code: response.status,
+            message: "Unexpected server error"
+        };
+
+    } catch (err: unknown) {
+        return {
+            code: 0,
+            message: err instanceof Error ? err.message : "Unknown network error"
+        };
+    }
+}
+
+
 
 
