@@ -14,6 +14,9 @@
 		"ghcr.io/devcontainers-extra/features/act:1": {},
 		"ghcr.io/devcontainers/features/terraform:1": {
 			"customDownloadServer": "https://hashicorp-releases.yandexcloud.net"
+		},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+			"moby": false
 		}
 	},
 
