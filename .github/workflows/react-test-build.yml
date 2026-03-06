@@ -1,14 +1,6 @@
 name: Test and build the React service
 on:
   workflow_call:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - react/public/**
-      - react/src/**
-      - react/index.html
-      - react/package*.json
 defaults:
   run:
     working-directory: react

@@ -1,12 +1,6 @@
 name: Test and build the Spring service
 on:
   workflow_call:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - spring/src/**
-      - spring/pom.xml
 defaults:
   run:
     working-directory: spring
