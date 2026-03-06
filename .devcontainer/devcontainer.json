@@ -13,7 +13,10 @@
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "24"
 		},
-		"ghcr.io/devcontainers-extra/features/act:1": {}
+		"ghcr.io/devcontainers-extra/features/act:1": {},
+		"ghcr.io/devcontainers/features/terraform:1": {
+			"customDownloadServer": "https://hashicorp-releases.yandexcloud.net"
+		}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
