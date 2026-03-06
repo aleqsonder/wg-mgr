@@ -1,0 +1,23 @@
+name: Test and build the application
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      # spring
+      - spring/src/**
+      - spring/pom.xml
+
+      # react
+      - react/public/**
+      - react/src/**
+      - react/index.html
+      - react/package*.json
+jobs:
+  spring:
+    uses: ./.github/workflows/spring-test-build.yml
+
+  react:
+    needs:
+      - spring
+    uses: ./.github/workflows/react-test-build.yml
