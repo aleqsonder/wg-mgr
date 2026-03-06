@@ -6,9 +6,15 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    test: {
+      environment: "happy-dom",
+      globals: true,
+      setupFiles: "./vitest.setup.ts",
+    },
     server: {
+      host: '0.0.0.0',
       proxy: {
-        "/api": {
+        '/api': {
           target: `http://${env.VITE_API_HOST}:${env.VITE_API_PORT}`,
           changeOrigin: true
         }

@@ -1,4 +1,7 @@
 #!/bin/sh
 
-cd backend
-mvn -B dependency:go-offline
+# install spring deps
+cd spring && mvn -B dependency:go-offline && cd ..
+
+# install react deps
+npm install --prefix react
