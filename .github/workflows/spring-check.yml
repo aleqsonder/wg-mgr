@@ -1,29 +1,12 @@
-name: Test and build the Spring service
+name: Build and test the Spring service
 on:
   workflow_call:
 defaults:
   run:
     working-directory: spring
 jobs:
-  unit-test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the repo
-        uses: actions/checkout@v4
-
-      - name: Install JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '25'
-        
-      - name: Run unit-tests
-        run: mvn -ff -e -Dtest=VpnUserServiceTest test
-
   build:
     runs-on: ubuntu-latest
-    needs:
-      - unit-test
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v4
@@ -36,3 +19,20 @@ jobs:
         
       - name: Build the Spring service
         run: mvn -B clean package -DskipTests
+
+  test:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+
+      - name: Install JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+        
+      - name: Run unit-tests
+        run: mvn -ff -e -Dtest=VpnUserServiceTest test
