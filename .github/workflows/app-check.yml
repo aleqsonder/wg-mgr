@@ -1,4 +1,4 @@
-name: Test and build the application
+name: Build and test the application
 on:
   pull_request:
     branches:
@@ -15,9 +15,9 @@ on:
       - react/package*.json
 jobs:
   spring:
-    uses: ./.github/workflows/spring-test-build.yml
+    uses: ./.github/workflows/spring-check.yml
 
   react:
     needs:
       - spring
-    uses: ./.github/workflows/react-test-build.yml
+    uses: ./.github/workflows/react-check.yml
