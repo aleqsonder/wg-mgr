@@ -5,9 +5,13 @@ services:
       - BACKEND_BASE_URL=http://spring:8177/api
     ports:
       - 80:80
+    depends_on:
+      - spring
 
   spring:
-    build: spring
+    build:
+      context: spring
+      dockerfile: dev.dockerfile
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
