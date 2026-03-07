@@ -3,6 +3,10 @@
 	"service": "dev",
 	"workspaceFolder": "/workspaces/wg-mgr",
 
+	"remoteEnv": {
+		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+	},
+
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
 		"ghcr.io/devcontainers-extra/features/maven-sdkman:2": {
