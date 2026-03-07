@@ -1,24 +1,22 @@
 services:
   react:
-    build: react
+    image: ghcr.io/aleqsonder/wg-mgr-react:latest
     environment:
       - BACKEND_BASE_URL=http://spring:8177/api
     ports:
       - 80:80
     depends_on:
       - spring
-
+  
   spring:
-    build:
-      context: spring
-      dockerfile: dev.dockerfile
+    image: ghcr.io/aleqsonder/wg-mgr-spring:latest
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
       - WGMGR_DB_CONN_STR=postgresql://db:5432/vpn
     depends_on:
       - db
-  
+
   db:
     image: postgres:16
     environment:
@@ -26,14 +24,9 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_DB=vpn
     volumes:
+      # LOCAL_WORKSPACE_FOLDER is required to compose from the devcontainer
       - ${LOCAL_WORKSPACE_FOLDER:-.}/postgres/initdb.d:/docker-entrypoint-initdb.d
       - pgdata:/var/lib/postgresql/data
 
-  adminer:
-    image: adminer
-    ports:
-      - '8080'
-
 volumes:
   pgdata:
-  
