@@ -13,6 +13,8 @@ on:
       - react/src/**
       - react/index.html
       - react/package*.json
+      - react/tsconfig*
+      - react/vite*
 jobs:
   spring:
     uses: ./.github/workflows/spring-check.yml
