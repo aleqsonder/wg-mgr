@@ -3,6 +3,10 @@
 	"service": "dev",
 	"workspaceFolder": "/workspaces/wg-mgr",
 
+	"remoteEnv": {
+		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+	},
+
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
 		"ghcr.io/devcontainers-extra/features/maven-sdkman:2": {
@@ -11,7 +15,13 @@
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "24"
 		},
-		"ghcr.io/devcontainers-extra/features/act:1": {}
+		"ghcr.io/devcontainers-extra/features/act:1": {},
+		"ghcr.io/devcontainers/features/terraform:1": {
+			"customDownloadServer": "https://hashicorp-releases.yandexcloud.net"
+		},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+			"moby": false
+		}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
