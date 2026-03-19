@@ -4,6 +4,9 @@ on:
     branches:
       - main
     paths:
+      # ci/cd
+      - .github/**
+
       # spring
       - spring/src/**
       - spring/pom.xml
