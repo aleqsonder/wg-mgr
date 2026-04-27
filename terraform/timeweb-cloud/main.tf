@@ -32,22 +32,18 @@ resource "twc_project" "wg-mgr-project" {
   name = "WireGuard Manager"
 }
 
+resource "twc_floating_ip" "main" {
+  availability_zone = twc_server.main.availability_zone
+}
+
 resource "twc_server" "main" {
   name              = "Main Server"
   os_id             = data.twc_software.docker.os[0].id
   software_id       = data.twc_software.docker.id
   availability_zone = "spb-3"
+  floating_ip_id = resource.twc_floating_ip.main
 
   preset_id = data.twc_presets.preset.id
 
   project_id = resource.twc_project.wg-mgr-project.id
-}
-
-resource "twc_floating_ip" "floating-ip" {
-  availability_zone = twc_server.main.availability_zone
-
-  resource {
-    type = "server"
-    id   = twc_server.main.id
-  }
 }
