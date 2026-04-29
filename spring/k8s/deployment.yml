@@ -3,7 +3,6 @@ kind: Deployment
 metadata:
   name: backend
 spec:
-  replicas: 3
   selector:
     matchLabels:
       app: spring
@@ -17,7 +16,13 @@ spec:
           image: ghcr.io/aleqsonder/wg-mgr-spring:20260319-165926
           ports:
             - containerPort: 8177
-          # TODO: Add readiness/liveness probes
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
           env:
             - name: POSTGRES_USER
               valueFrom:
@@ -34,4 +39,5 @@ spec:
                 configMapKeyRef:
                   name: backend
                   key: conn-str
+          # TODO: Add readiness/liveness probes
     
