@@ -17,7 +17,21 @@ spec:
           image: ghcr.io/aleqsonder/wg-mgr-spring:20260319-165926
           ports:
             - containerPort: 8177
-          envFrom:
-            - configMapRef:
-                name: backend
           # TODO: Add readiness/liveness probes
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: password
+            - name: WGMGR_DB_CONN_STR
+              valueFrom:
+                configMapKeyRef:
+                  name: backend
+                  key: conn-str
+    
