@@ -3,7 +3,7 @@ setlocal
 
 set "SCRIPT_DIR=%~dp0"
 
-for %%t in (service deployment) do (
+for %%t in (service hpa deployment) do (
 	kubectl delete %%t backend
 )
 
