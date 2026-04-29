@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: spring
+  template:
+    metadata:
+      labels:
+        app: spring
+    spec:
+      containers:
+        - name: spring
+          image: ghcr.io/aleqsonder/wg-mgr-spring:20260319-165926
+          ports:
+            - containerPort: 8177
+          envFrom:
+            - configMapRef:
+                name: backend
+          # TODO: Add readiness/liveness probes
