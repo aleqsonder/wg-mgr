@@ -3,7 +3,7 @@
 ## ConfigMap
 
 Create a `ConfigMap` before starting up the cluster.
-`ConfigMap` example is placed below.
+`ConfigMap` file template is placed below.
 
 ```yml
 apiVersion: v1
@@ -14,21 +14,15 @@ data:
   BACKEND_BASE_URL: http://<host>:<port>/api
 ```
 
+### Important
+
+Manual ConfigMap definition is redundant in case the whole application
+cluster is set up with the [main setup script](../../k8s/setup.bat).
+
 ## Setup script
 
-There also are [sh](setup.sh) and [batch](setup.bat) setup scripts.
-Usage prerequisites (any of):
-- There is a file named *.configmap.yml* in the same directory as the
-  script.
-- There is a file named *.env* in the same directory as the script
-- There is an env variable `BACKEND_BASE_URL` exported
+There also is [batch](setup.bat) setup script.
 
-Linux:
-```sh
-sh setup.sh
-```
-
-Windows:
 ```bat
 .\setup.bat
 ```
@@ -36,14 +30,8 @@ Windows:
 ## Cleanup script
 
 To remove all created kubernetes entities execute the
-[sh](cleanup.sh) or [batch](cleanup.bat) scipt.
+[batch](cleanup.bat) scipt.
 
-Linux:
-```sh
-sh cleanup.sh
-```
-
-Windows:
 ```bat
 .\cleanup.bat
 ```
