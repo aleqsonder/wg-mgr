@@ -18,6 +18,23 @@ services:
       - WGMGR_DB_CONN_STR=postgresql://db:5432/vpn
     depends_on:
       - db
+
+  prometheus:
+    image: prom/prometheus:main
+    ports:
+      - "9090:9090"
+    volumes:
+      # LOCAL_WORKSPACE_FOLDER is required to compose from the devcontainer
+      - ${LOCAL_WORKSPACE_FOLDER:-.}/prometheus/dev.prometheus.yml:/etc/prometheus/prometheus.yml
+      - promdata:/prometheus
+
+  grafana:
+    image: grafana/grafana:main-ubuntu
+    ports: 
+      - "3000:3000"
+    volumes:
+      # LOCAL_WORKSPACE_FOLDER is required to compose from the devcontainer
+      - ${LOCAL_WORKSPACE_FOLDER:-.}/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
   
   db:
     image: postgres:16
@@ -37,4 +54,5 @@ services:
 
 volumes:
   pgdata:
+  promdata:
   
