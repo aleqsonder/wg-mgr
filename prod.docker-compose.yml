@@ -28,5 +28,21 @@ services:
       - ${LOCAL_WORKSPACE_FOLDER:-.}/postgres/initdb.d:/docker-entrypoint-initdb.d
       - pgdata:/var/lib/postgresql/data
 
+  prometheus:
+    image: prom/prometheus:main-distroless
+    volumes:
+      # LOCAL_WORKSPACE_FOLDER is required to compose from the devcontainer
+      - ${LOCAL_WORKSPACE_FOLDER:-.}/prometheus/prod.prometheus.yml:/etc/prometheus/prometheus.yml
+      - promdata:/prometheus
+
+  grafana:
+    image: grafana/grafana:main-ubuntu
+    ports: 
+      - "3000:3000"
+    volumes:
+      # LOCAL_WORKSPACE_FOLDER is required to compose from the devcontainer
+      - ${LOCAL_WORKSPACE_FOLDER:-.}/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+  
 volumes:
   pgdata:
+  promdata:
