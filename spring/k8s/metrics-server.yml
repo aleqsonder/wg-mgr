@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: spring
+  name: spring-metrics
   labels:
     app: spring
 spec:
@@ -12,3 +12,5 @@ spec:
     - name: http
       port: 8177
       targetPort: 8177
+      protocol: TCP
+    
