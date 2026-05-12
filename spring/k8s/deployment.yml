@@ -1,7 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: spring
+  namespace: backend
+  labels:
+    app: spring
 spec:
   selector:
     matchLabels:
@@ -13,9 +16,10 @@ spec:
     spec:
       containers:
         - name: spring
-          image: ghcr.io/aleqsonder/wg-mgr-spring:20260319-165926
+          image: ghcr.io/aleqsonder/wg-mgr-spring:latest
           ports:
-            - containerPort: 8177
+            - name: http
+              containerPort: 8177
           resources:
             requests:
               cpu: 500m
@@ -39,5 +43,16 @@ spec:
                 configMapKeyRef:
                   name: backend
                   key: conn-str
-          # TODO: Add readiness/liveness probes
+          readinessProbe:
+            httpGet:
+              path: /api/actuator/health
+              port: 8177
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/actuator/health
+              port: 8177
+            initialDelaySeconds: 15
+            periodSeconds: 7
     

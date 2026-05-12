@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: react
-          image: ghcr.io/aleqsonder/wg-mgr-react:20260319-165846
+          image: ghcr.io/aleqsonder/wg-mgr-react:latest
           ports:
             - containerPort: 80
           envFrom:
