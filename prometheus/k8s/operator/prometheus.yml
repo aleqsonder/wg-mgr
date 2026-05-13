@@ -1,0 +1,41 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: prometheus
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: prometheus
+spec:
+  serviceAccountName: prometheus
+
+  portName: web
+  
+  serviceMonitorSelector:
+    matchLabels:
+      monitoring: wg-mgr
+  
+  podMonitorSelector:
+    matchLabels:
+      monitoring: wg-mgr
+  
+  ruleSelector:
+    matchLabels:
+      monitoring: wg-mgr
+  
+  retention: 3d # TSDB retention period
+  resources:
+    requests:
+      cpu: 200m
+      memory: 400Mi
+    limits:
+      cpu: 500m
+      memory: 800Mi
+
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce # one pod is writing at a moment
+        resources:
+          requests:
+            storage: 5Gi

@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-operator
+  namespace: monitoring
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus-operator
+rules:
+  # access to own CRDs
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - prometheus
+      - prometheusrules
+      - servicemonitors
+      - podmonitors
+      - alertmanagers
+      - thanosrulers
+      - prometheusagents
+    verbs: ["*"]
+
+  # Deployment & StatefulSet management
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
+      - deployments
+    verbs: ["*"]
+  
+  # Kubernetes built-in resoureces
+  - apiGroups: [""]
+    resources:
+      - configmaps # to write generated prometheus.yml into config-maps
+      - secrets
+      - pods
+      - services
+      - serviceaccounts
+      - endpoints
+      - nodes
+      - namespaces
+    verbs: ["*"]
+
+  # Ingress
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  
+  # StorageClass
+  - apiGroups:
+      - storage.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Clusterrole
+  name: prometheus-operator
+subjects:
+  - kind: ServiceAccount
+    name: prometheus-operator
+    namespace: monitoring
