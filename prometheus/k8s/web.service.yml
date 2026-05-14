@@ -6,10 +6,9 @@ metadata:
   labels:
     app: prometheus
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: prometheus
-
   ports:
     - name: web
       port: 9090
