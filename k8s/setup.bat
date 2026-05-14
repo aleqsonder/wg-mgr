@@ -17,6 +17,6 @@ kubectl create configmap backend ^
 kubectl create configmap frontend ^
 	--from-literal=BACKEND_BASE_URL=http://backend:8177/api
 
-for %%s in (postgres spring react) do (
+for %%s in (postgres spring react prometheus grafana) do (
 	%SCRIPT_DIR%..\%%s\k8s\setup.bat
 )

@@ -17,4 +17,5 @@ if exist "%CONFIG_MAP_FILE%" (
 kubectl apply ^
     -f %SCRIPT_DIR%deployment.yml ^
     -f %SCRIPT_DIR%hpa.yml ^
-    -f %SCRIPT_DIR%service.yml
+    -f %SCRIPT_DIR%service.yml ^
+    -f %SCRIPT_DIR%metrics-service.yml
