@@ -34,7 +34,9 @@ services:
       - "3000:3000"
     volumes:
       # LOCAL_WORKSPACE_FOLDER is required to compose from the devcontainer
-      - ${LOCAL_WORKSPACE_FOLDER:-.}/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ${LOCAL_WORKSPACE_FOLDER:-.}/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
   
   db:
     image: postgres:16
