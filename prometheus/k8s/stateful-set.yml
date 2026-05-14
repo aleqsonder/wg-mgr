@@ -58,11 +58,11 @@ spec:
               cpu: 500m
               memory: 512Mi
           readinessProbe:
-            httpget:
+            httpGet:
               path: /-/ready
               port: 9090
             initialDelaySeconds: 10
-            periodSeconts: 10
+            periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /-/healthy
