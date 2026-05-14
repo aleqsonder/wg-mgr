@@ -20,4 +20,4 @@ kubectl create configmap grafana-dashboards -n monitoring ^
 kubectl apply ^
 	-f %SCRIPT_DIR%datasources.configmap.yml ^
 	-f %SCRIPT_DIR%statefulset.yml ^
-	-f %SCRIPT_DIR%web-service.yml
+	-f %SCRIPT_DIR%web.service.yml
