@@ -21,10 +21,10 @@ spec:
               containerPort: 8177
           resources:
             requests:
-              cpu: 500m
+              cpu: 200m
               memory: 1Gi
             limits:
-              cpu: 1000m
+              cpu: 500m
               memory: 1Gi
           env:
             - name: POSTGRES_USER
