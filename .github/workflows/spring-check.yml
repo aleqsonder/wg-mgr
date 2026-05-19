@@ -1,5 +1,10 @@
 name: Test and build the Spring service
 on:
+  # TEST
+  push:
+    branches:
+      - lab4/**
+
   workflow_call:
 defaults:
   run:
