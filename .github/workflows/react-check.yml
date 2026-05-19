@@ -53,5 +53,8 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v7
         with:
           projectBaseDir: react
+          args: >
+            -Dsonar.projectKey=wg-mgr_react
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_REACT }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}

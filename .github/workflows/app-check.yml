@@ -21,8 +21,10 @@ on:
 jobs:
   spring:
     uses: ./.github/workflows/spring-check.yml
+    secrets: inherit
 
   react:
     needs:
       - spring
     uses: ./.github/workflows/react-check.yml
+    secrets: inherit
