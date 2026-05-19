@@ -1,5 +1,10 @@
 name: Test and build the React service
 on:
+  # TEST
+  push:
+    branches:
+      - lab4/**
+
   workflow_call:
 defaults:
   run:
@@ -54,4 +59,7 @@ jobs:
         with:
           projectBaseDir: react
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_REACT }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        args: >
+          -Dsonar.projectKey=wg-mgr_react
