@@ -1,0 +1,42 @@
+name: Send Telegram Notification
+inputs:
+  service:
+    required: true
+    type: string
+  job-status:
+    required: true
+    type: string
+  bot-token:
+    required: true
+    type: string
+  chat-id:
+    required: true
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - name: Send
+      env:
+        RUN_URL: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      shell: bash
+      run: |
+        TEXT="
+        $(if [ ${{ inputs.job-status }} = "success" ]; \
+          then echo "🟢"; else echo "🔴"; \
+        fi) ${{ inputs.service }} - ${{ inputs.job-status }}
+
+        🔧 Workflow: ${{ github.workflow }}
+        📌 Job: ${{ github.job }}
+        ⚡ Trigger: ${{ github.event_name }}
+        👤 Actor: ${{ github.actor }}
+
+        🔗 Pipeline run: ${RUN_URL}
+
+        ⏱️ Time: $(date '+%Y-%m-%d %H:%M:%S')
+        "
+
+        curl -X POST \
+          https://api.telegram.org/bot${{ inputs.bot-token }}/sendMessage \
+          -H "Content-Type: application/json" \
+          -d "{\"chat_id\": \"${{ inputs.chat-id }}\", \"text\": \"${TEXT}\"}"
