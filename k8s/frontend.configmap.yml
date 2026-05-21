@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: frontend
-data:
-  BACKEND_BASE_URL: http://spring:8177/api

@@ -9,6 +9,8 @@ spec:
     repoURL: https://github.com/aleqsonder/wg-mgr.git
     targetRevision: main
     path: prometheus/k8s
+    directory:
+      include: "*.yml"
   destination:
     server: https://kubernetes.default.svc
     namespace: default

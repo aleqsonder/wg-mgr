@@ -8,9 +8,9 @@ spec:
   source:
     repoURL: https://github.com/aleqsonder/wg-mgr.git
     targetRevision: main
-    path: spring/k8s/manifests
+    path: spring/k8s
     directory:
-      exclude: argocd.application.yml
+      include: "*.yml"
   destination:
     server: https://kubernetes.default.svc
     namespace: default
