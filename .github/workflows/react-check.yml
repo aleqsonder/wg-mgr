@@ -58,3 +58,11 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_REACT }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+
+      - name: SonarQube Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v7
+        with:
+          pollingTimeoutSec: 300
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_REACT }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
