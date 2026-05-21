@@ -24,7 +24,5 @@ jobs:
     secrets: inherit
 
   react:
-    needs:
-      - spring
     uses: ./.github/workflows/react-check.yml
     secrets: inherit
