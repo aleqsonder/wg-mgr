@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import wg.mgr.backend.dto.ContactRequest;
 import wg.mgr.backend.dto.UserWithContactsRequest;
+import wg.mgr.backend.dto.UserWithContactsResponse;
 import wg.mgr.backend.exception.ConflictVpnException;
 import wg.mgr.backend.exception.NotFoundVpnException;
 import wg.mgr.backend.exception.ServerVpnException;
@@ -20,6 +21,7 @@ import wg.mgr.backend.service.VpnUserService;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -153,6 +155,36 @@ public class VpnUserServiceTest {
 
         assertEquals(existingUser.getId(), result.id());
         assertEquals("existingName", result.username());
+    }
+
+    // ---------- getAll() ----------
+
+    @Test
+    void getAll_returnsAllUsers() {
+        VpnUser first = new VpnUser();
+        first.setId(1L);
+        first.setUsername("john");
+
+        VpnUser second = new VpnUser();
+        second.setId(2L);
+        second.setUsername("bob");
+
+        when(vpnUserRepository.findAll()).thenReturn(List.of(first, second));
+
+        List<UserWithContactsResponse> result = vpnUserService.getAll();
+
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(UserWithContactsResponse::username)
+                .containsExactlyInAnyOrder("john", "bob");
+    }
+
+    @Test
+    void getAll_returnsEmptyList_whenNoUsers() {
+        when(vpnUserRepository.findAll()).thenReturn(List.of());
+
+        List<UserWithContactsResponse> result = vpnUserService.getAll();
+
+        assertThat(result).isEmpty();
     }
 
     // ---------- delete() ----------
