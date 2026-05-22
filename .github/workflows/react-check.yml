@@ -55,6 +55,7 @@ jobs:
           projectBaseDir: react
           args: >
             -Dsonar.projectKey=wg-mgr_react
+            -Dsonar.exclusions=k8s/**,argocd/**,node_modules/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_REACT }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
