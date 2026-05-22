@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: spring
-          image: ghcr.io/aleqsonder/wg-mgr-spring:latest
+          image: ghcr.io/aleqsonder/wg-mgr-spring:20260522-162343
           ports:
             - name: http
               containerPort: 8177
