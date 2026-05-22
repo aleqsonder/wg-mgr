@@ -1,19 +1,26 @@
-SERVICES:=spring react prometheus grafana
+SERVICES:=postgres prometheus grafana
+APPLICATIONS:=spring react
 
-up: | create-monitoring.namespace apply-argocd.install $(addprefix up-,$(SERVICES))
-	$(MAKE) -C ../postgres/k8s up
+up: | monitoring.namespace argocd.install $(SERVICES) $(APPLICATIONS)
+down: | $(addprefix down-,$(APPLICATIONS) $(SERVICES)) del-monitoring.namespace del-argocd.namespace
 
-down: | delete-argocd.namespace delete-monitoring.namespace
-	$(MAKE) -C ../postgres/k8s down
+argocd.install: | argocd.namespace
+	kubectl apply -n argocd --server-side --force-conflicts -f custom.install.yml
 
-%-argocd.install: | create-argocd.namespace
-	kubectl $* -n argocd --server-side --force-conflicts -f custom.install.yml
-
-create-%.namespace:
+%.namespace:
 	-kubectl create namespace $*
 
-delete-%.namespace:
+del-%.namespace:
 	-kubectl delete namespace $*
 
-up-%: ../%/argocd
+$(SERVICES): %: ../%/k8s
 	$(MAKE) -C $< up
+
+$(APPLICATIONS): %: ../%/argocd
+	$(MAKE) -C $< up
+
+$(addprefix down-,$(SERVICES)): down-%: ../%/k8s
+	$(MAKE) -C $< down
+
+$(addprefix down-,$(APPLICATIONS)): down-%: ../%/argocd
+	$(MAKE) -C $< down
