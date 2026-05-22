@@ -61,7 +61,7 @@ jobs:
         if: always()
         uses: ./.github/actions/tg-notify
         with:
-          service: react
+          service: spring
           job-status: ${{ job.status }}
           bot-token: ${{ secrets.BOT_TOKEN }}
           chat-id: ${{ secrets.CHAT_ID }}

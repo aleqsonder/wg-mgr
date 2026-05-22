@@ -1,5 +1,5 @@
-SERVICES:=postgres prometheus grafana
-APPLICATIONS:=spring react
+SERVICES:=prometheus grafana
+APPLICATIONS:=postgres spring react
 
 up: | monitoring.namespace argocd.install $(SERVICES) $(APPLICATIONS)
 down: | $(addprefix down-,$(APPLICATIONS) $(SERVICES)) del-monitoring.namespace del-argocd.namespace
