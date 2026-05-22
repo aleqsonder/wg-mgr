@@ -13,6 +13,7 @@ function App() {
             <NavBar />
 
             <main className={styles.content}>
+
                 <Routes>
                     <Route path="/" element={<UsersPage />} />
                     <Route path="/account" element={<AccountPage />} />
