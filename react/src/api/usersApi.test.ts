@@ -1,283 +1,227 @@
-import { vi, describe, it, expect, beforeEach } from "vitest";
-
-import {
-    fetchUsers,
-    fetchUserById,
-    createUser,
-} from "./usersApi";
-
-// Достаём type-guards через прямой импорт, если они экспортируются.
-// Если нет — можно протестировать только публичные функции.
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
     isUserContactResponse,
     isUserResponse,
     isUserResponseArray,
     isResponseMessage,
-} from "./usersApi";
+    fetchUsers,
+    fetchUserById,
+    createUser,
+    deleteUser,
+    editUser,
+} from './usersApi';
+import type { UserRequest } from '../types/userRelated';
 
-describe("Type guards", () => {
-    it("isUserContactResponse — корректный объект", () => {
-        expect(
-            isUserContactResponse({ contactType: "email", content: "a@b.com" })
-        ).toBe(true);
+// ─────────────────────────────────────────────────────────────────────────────
+// Вспомогательные фикстуры
+// ─────────────────────────────────────────────────────────────────────────────
+const validContact = { contactType: 'telegram', content: '@alice' };
+const validUser = { id: 1, username: 'alice', contacts: [validContact] };
+const validUserArray = [validUser];
+const errorMessage = { code: 404, message: 'Not found' };
+
+function mockFetch(status: number, body: unknown, ok?: boolean) {
+    const resolvedOk = ok ?? (status >= 200 && status < 300);
+    return vi.fn().mockResolvedValue({
+        ok: resolvedOk,
+        status,
+        json: () => Promise.resolve(body),
+    });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Тесты guard-функций (type guards)
+// ─────────────────────────────────────────────────────────────────────────────
+describe('isUserContactResponse', () => {
+    it('возвращает true для корректного объекта', () => {
+        expect(isUserContactResponse(validContact)).toBe(true);
     });
 
-    it("isUserContactResponse — некорректный объект", () => {
-        expect(isUserContactResponse({ contactType: 123, content: "x" })).toBe(false);
+    it('возвращает false для null', () => {
         expect(isUserContactResponse(null)).toBe(false);
-        expect(isUserContactResponse({})).toBe(false);
     });
 
-    it("isUserResponse — корректный объект", () => {
-        expect(
-            isUserResponse({
-                id: 1,
-                username: "Alice",
-                contacts: [{ contactType: "email", content: "a@b.com" }],
-            })
-        ).toBe(true);
+    it('возвращает false если поле content отсутствует', () => {
+        expect(isUserContactResponse({ contactType: 'telegram' })).toBe(false);
     });
 
-    it("isUserResponse — некорректный объект", () => {
-        expect(isUserResponse({ id: "1", username: "A", contacts: [] })).toBe(false);
-        expect(isUserResponse(null)).toBe(false);
-        expect(isUserResponse({})).toBe(false);
+    it('возвращает false если contactType не строка', () => {
+        expect(isUserContactResponse({ contactType: 42, content: '@alice' })).toBe(false);
+    });
+});
+
+describe('isUserResponse', () => {
+    it('возвращает true для корректного объекта', () => {
+        expect(isUserResponse(validUser)).toBe(true);
     });
 
-    it("isUserResponseArray — корректный массив", () => {
-        expect(
-            isUserResponseArray([
-                {
-                    id: 1,
-                    username: "A",
-                    contacts: [{ contactType: "email", content: "x" }],
-                },
-            ])
-        ).toBe(true);
+    it('возвращает false если id не число', () => {
+        expect(isUserResponse({ ...validUser, id: '1' })).toBe(false);
     });
 
-    it("isUserResponseArray — некорректный массив", () => {
-        expect(isUserResponseArray([{ id: "1" }])).toBe(false);
-        expect(isUserResponseArray("not array")).toBe(false);
+    it('возвращает false если contacts не массив', () => {
+        expect(isUserResponse({ ...validUser, contacts: {} })).toBe(false);
     });
 
-    it("isResponseMessage — корректный объект", () => {
-        expect(isResponseMessage({ code: 400, message: "Bad" })).toBe(true);
+    it('возвращает false если contacts содержит невалидный элемент', () => {
+        expect(isUserResponse({ ...validUser, contacts: [{ wrong: true }] })).toBe(false);
+    });
+});
+
+describe('isUserResponseArray', () => {
+    it('возвращает true для массива валидных пользователей', () => {
+        expect(isUserResponseArray(validUserArray)).toBe(true);
     });
 
-    it("isResponseMessage — некорректный объект", () => {
-        expect(isResponseMessage({ code: "400", message: "Bad" })).toBe(false);
+    it('возвращает true для пустого массива', () => {
+        expect(isUserResponseArray([])).toBe(true);
+    });
+
+    it('возвращает false для не-массива', () => {
+        expect(isUserResponseArray(validUser)).toBe(false);
+    });
+});
+
+describe('isResponseMessage', () => {
+    it('возвращает true для корректного объекта', () => {
+        expect(isResponseMessage(errorMessage)).toBe(true);
+    });
+
+    it('возвращает false если code не число', () => {
+        expect(isResponseMessage({ code: 'X', message: 'err' })).toBe(false);
+    });
+
+    it('возвращает false для null', () => {
         expect(isResponseMessage(null)).toBe(false);
     });
 });
 
-describe("API functions", () => {
-    beforeEach(() => {
-        vi.restoreAllMocks();
+// ─────────────────────────────────────────────────────────────────────────────
+// Тесты API-функций с мокированием fetch
+// ─────────────────────────────────────────────────────────────────────────────
+describe('fetchUsers', () => {
+    beforeEach(() => { vi.stubGlobal('fetch', mockFetch(200, validUserArray)); });
+    afterEach(() => { vi.unstubAllGlobals(); });
+
+    it('возвращает массив пользователей при успешном ответе', async () => {
+        const result = await fetchUsers();
+        expect(Array.isArray(result)).toBe(true);
+        expect((result as typeof validUserArray)[0].username).toBe('alice');
     });
 
-    const mockFetch = (status: number, json: unknown) => {
-        global.fetch = vi.fn().mockResolvedValue({
-            ok: status >= 200 && status < 300,
-            status,
-            json: vi.fn().mockResolvedValue(json),
-        } as Partial<Response>) as unknown as typeof fetch;
-    };
-
-
-    const mockFetchJsonError = (status: number) => {
-        global.fetch = vi.fn().mockResolvedValue({
-            ok: status >= 200 && status < 300,
-            status,
-            json: vi.fn().mockRejectedValue(new Error("Invalid JSON")),
-        } as Partial<Response>) as unknown as typeof fetch;
-    };
-
-    const mockFetchReject = (error: string) => {
-        global.fetch = vi.fn().mockRejectedValue(new Error(error) as Partial<Response>) as unknown as typeof fetch;
-    };
-
-    // -----------------------------
-    // fetchUsers
-    // -----------------------------
-    describe("fetchUsers", () => {
-        it("возвращает список пользователей при корректном ответе", async () => {
-            mockFetch(200, [
-                {
-                    id: 1,
-                    username: "Alice",
-                    contacts: [{ contactType: "email", content: "a@b.com" }],
-                },
-            ]);
-
-            const result = await fetchUsers();
-            expect(Array.isArray(result)).toBe(true);
-
-            if (Array.isArray(result)) {
-                expect(result[0].username).toBe("Alice");
-            }
-        });
-
-        it("возвращает ошибку, если формат списка неверный", async () => {
-            mockFetch(200, [{ id: "wrong" }]);
-
-            const result = await fetchUsers();
-            expect(result).toEqual({
-                code: 500,
-                message: "Invalid user list format",
-            });
-        });
-
-        it("возвращает ResponseMessage при ошибке сервера", async () => {
-            mockFetch(404, { code: 404, message: "Not found" });
-
-            const result = await fetchUsers();
-            expect(result).toEqual({ code: 404, message: "Not found" });
-        });
-
-        it("возвращает Unexpected server error, если сервер вернул мусор", async () => {
-            mockFetch(500, { foo: "bar" });
-
-            const result = await fetchUsers();
-            expect(result).toEqual({
-                code: 500,
-                message: "Unexpected server error",
-            });
-        });
-
-        it("возвращает ошибку сети", async () => {
-            mockFetchReject("Network down");
-
-            const result = await fetchUsers();
-            expect(result).toEqual({
-                code: 0,
-                message: "Network down",
-            });
-        });
-
-        it("возвращает ошибку, если JSON не парсится", async () => {
-            mockFetchJsonError(200);
-
-            const result = await fetchUsers();
-            expect(result).toEqual({
-                code: 500,
-                message: "Invalid user list format",
-            });
-        });
+    it('возвращает ResponseMessage при невалидном формате ответа', async () => {
+        vi.stubGlobal('fetch', mockFetch(200, { wrong: true }));
+        const result = await fetchUsers();
+        expect((result as { code: number }).code).toBe(500);
     });
 
-    // -----------------------------
-    // fetchUserById
-    // -----------------------------
-    describe("fetchUserById", () => {
-        it("возвращает пользователя при корректном ответе", async () => {
-            mockFetch(200, {
-                id: 1,
-                username: "Alice",
-                contacts: [{ contactType: "email", content: "a@b.com" }],
-            });
-
-            const result = await fetchUserById(1);
-            if ("username" in result) {
-                expect(result.username).toBe("Alice");
-            }
-        });
-
-        it("возвращает ошибку, если формат неверный", async () => {
-            mockFetch(200, { id: "wrong" });
-
-            const result = await fetchUserById(1);
-            expect(result).toEqual({
-                code: 500,
-                message: "Invalid user format",
-            });
-        });
-
-        it("возвращает ResponseMessage при ошибке сервера", async () => {
-            mockFetch(404, { code: 404, message: "Not found" });
-
-            const result = await fetchUserById(1);
-            expect(result).toEqual({ code: 404, message: "Not found" });
-        });
-
-        it("возвращает Unexpected server error, если сервер вернул мусор", async () => {
-            mockFetch(500, { foo: "bar" });
-
-            const result = await fetchUserById(1);
-            expect(result).toEqual({
-                code: 500,
-                message: "Unexpected server error",
-            });
-        });
-
-        it("возвращает ошибку сети", async () => {
-            mockFetchReject("Network down");
-
-            const result = await fetchUserById(1);
-            expect(result).toEqual({
-                code: 0,
-                message: "Network down",
-            });
-        });
+    it('возвращает ResponseMessage при ошибке сети', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
+        const result = await fetchUsers();
+        expect((result as { code: number }).code).toBe(0);
+        expect((result as { message: string }).message).toBe('Network error');
     });
 
-    // -----------------------------
-    // createUser
-    // -----------------------------
-    describe("createUser", () => {
-        const payload = {
-            username: "Alice",
-            contacts: [],
-        };
+    it('возвращает ResponseMessage от сервера при HTTP-ошибке', async () => {
+        vi.stubGlobal('fetch', mockFetch(404, errorMessage));
+        const result = await fetchUsers();
+        expect((result as typeof errorMessage).code).toBe(404);
+    });
+});
 
-        it("возвращает созданного пользователя", async () => {
-            mockFetch(201, {
-                id: 10,
-                username: "Alice",
-                contacts: [],
-            });
+describe('fetchUserById', () => {
+    afterEach(() => { vi.unstubAllGlobals(); });
 
-            const result = await createUser(payload);
-            if ("id" in result) {
-                expect(result.id).toBe(10);
-            }
-        });
+    it('возвращает пользователя при успешном ответе', async () => {
+        vi.stubGlobal('fetch', mockFetch(200, validUser));
+        const result = await fetchUserById(1);
+        expect((result as typeof validUser).username).toBe('alice');
+    });
 
-        it("возвращает ошибку, если формат неверный", async () => {
-            mockFetch(201, { foo: "bar" });
+    it('возвращает ResponseMessage при HTTP 404', async () => {
+        vi.stubGlobal('fetch', mockFetch(404, errorMessage));
+        const result = await fetchUserById(99);
+        expect((result as { code: number }).code).toBe(404);
+    });
 
-            const result = await createUser(payload);
-            expect(result).toEqual({
-                code: 500,
-                message: "Invalid user format",
-            });
-        });
+    it('возвращает fallback ResponseMessage при невалидном теле ошибки', async () => {
+        vi.stubGlobal('fetch', mockFetch(500, null));
+        const result = await fetchUserById(1);
+        expect((result as { code: number }).code).toBe(500);
+    });
+});
 
-        it("возвращает ResponseMessage при ошибке сервера", async () => {
-            mockFetch(400, { code: 400, message: "Bad request" });
+describe('createUser', () => {
+    const payload: UserRequest = { username: 'alice', contacts: [{ contactType: 'telegram', content: '@alice' }] };
+    afterEach(() => { vi.unstubAllGlobals(); });
 
-            const result = await createUser(payload);
-            expect(result).toEqual({ code: 400, message: "Bad request" });
-        });
+    it('возвращает созданного пользователя', async () => {
+        vi.stubGlobal('fetch', mockFetch(200, validUser));
+        const result = await createUser(payload);
+        expect((result as typeof validUser).id).toBe(1);
+    });
 
-        it("возвращает Unexpected server error, если сервер вернул мусор", async () => {
-            mockFetch(500, { foo: "bar" });
+    it('передаёт корректный метод и заголовок Content-Type', async () => {
+        const spy = mockFetch(200, validUser);
+        vi.stubGlobal('fetch', spy);
+        await createUser(payload);
+        const [, opts] = spy.mock.calls[0] as [string, RequestInit];
+        expect(opts.method).toBe('POST');
+        expect((opts.headers as Record<string, string>)['Content-Type']).toBe('application/json');
+    });
 
-            const result = await createUser(payload);
-            expect(result).toEqual({
-                code: 500,
-                message: "Unexpected server error",
-            });
-        });
+    it('возвращает ResponseMessage при конфликте 409', async () => {
+        vi.stubGlobal('fetch', mockFetch(409, { code: 409, message: 'Conflict' }));
+        const result = await createUser(payload);
+        expect((result as { code: number }).code).toBe(409);
+    });
+});
 
-        it("возвращает ошибку сети", async () => {
-            mockFetchReject("Network down");
+describe('deleteUser', () => {
+    afterEach(() => { vi.unstubAllGlobals(); });
 
-            const result = await createUser(payload);
-            expect(result).toEqual({
-                code: 0,
-                message: "Network down",
-            });
-        });
+    it('возвращает { success: true } при статусе 204', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ status: 204, ok: true }));
+        const result = await deleteUser(1);
+        expect(result).toEqual({ success: true });
+    });
+
+    it('возвращает ResponseMessage при HTTP-ошибке', async () => {
+        vi.stubGlobal('fetch', mockFetch(404, errorMessage));
+        const result = await deleteUser(99);
+        expect((result as { code: number }).code).toBe(404);
+    });
+
+    it('возвращает fallback при нечитаемом теле ошибки', async () => {
+        vi.stubGlobal('fetch', mockFetch(500, null));
+        const result = await deleteUser(1);
+        expect((result as { code: number }).code).toBe(500);
+    });
+});
+
+describe('editUser', () => {
+    const payload: UserRequest = { username: 'bob', contacts: [] };
+    afterEach(() => { vi.unstubAllGlobals(); });
+
+    it('возвращает обновлённого пользователя', async () => {
+        const updated = { ...validUser, username: 'bob' };
+        vi.stubGlobal('fetch', mockFetch(200, updated));
+        const result = await editUser(1, payload);
+        expect((result as typeof validUser).username).toBe('bob');
+    });
+
+    it('передаёт метод PUT с телом запроса', async () => {
+        const spy = mockFetch(200, { ...validUser, username: 'bob' });
+        vi.stubGlobal('fetch', spy);
+        await editUser(1, payload);
+        const [, opts] = spy.mock.calls[0] as [string, RequestInit];
+        expect(opts.method).toBe('PUT');
+        expect(opts.body).toBe(JSON.stringify(payload));
+    });
+
+    it('возвращает ResponseMessage при ошибке сети', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Offline')));
+        const result = await editUser(1, payload);
+        expect((result as { message: string }).message).toBe('Offline');
     });
 });

@@ -8,9 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:watch": "vitest --watch"
+    "test": "vitest run",
+    "test:ui": "vitest run --ui",
+    "test:watch": "vitest run --watch",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@testing-library/react": "^16.3.2",

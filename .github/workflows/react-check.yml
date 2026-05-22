@@ -20,7 +20,7 @@ jobs:
         run: npm install
 
       - name: Run unit-tests
-        run: npm test
+        run: npm run test
 
       - name: Notify
         if: always()
@@ -66,6 +66,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Install deps
+        run: npm install
+
+      - name: Generate coverage report
+        run: npm run test:coverage
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v7
