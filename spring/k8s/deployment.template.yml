@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring
+  labels:
+    app: spring
+spec:
+  selector:
+    matchLabels:
+      app: spring
+  template:
+    metadata:
+      labels:
+        app: spring
+    spec:
+      containers:
+        - name: spring
+          image: ghcr.io/aleqsonder/wg-mgr-spring:${IMAGE_TAG}
+          ports:
+            - name: http
+              containerPort: 8177
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: password
+            - name: WGMGR_DB_CONN_STR
+              valueFrom:
+                configMapKeyRef:
+                  name: backend
+                  key: conn-str
+          readinessProbe:
+            httpGet:
+              path: /api/actuator/health
+              port: 8177
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/actuator/health
+              port: 8177
+            initialDelaySeconds: 30
+            periodSeconds: 10
+    

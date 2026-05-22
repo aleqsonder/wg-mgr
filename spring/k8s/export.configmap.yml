@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-export
+data:
+  # http://spring:8177/api
+  host: spring
+  port: "8177"
+  base: api

@@ -14,12 +14,19 @@ spec:
     spec:
       containers:
         - name: react
-          image: ghcr.io/aleqsonder/wg-mgr-react:latest
+          image: ghcr.io/aleqsonder/wg-mgr-react:${IMAGE_TAG}
           ports:
             - containerPort: 80
           envFrom:
             - configMapRef:
                 name: frontend
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
           readinessProbe:
             httpGet:
               path: /
