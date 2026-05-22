@@ -16,6 +16,7 @@ env:
 jobs:
   check:
     uses: ./.github/workflows/react-check.yml
+    secrets: inherit
 
   release:
     runs-on: ubuntu-latest
@@ -49,12 +50,11 @@ jobs:
             ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
             ${{ env.IMAGE }}:latest
 
-      - name: Commit image tag
-        working-directory: react/k8s
-        run: |
-          envsubst < deployment.template.yml > deployment.yml
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-          git pull
-          git commit deployment.yml -m "chore(react): Update image tag to ${IMAGE_TAG} [skip ci]"
-          git push
+      - name: Notify
+        if: always()
+        uses: ./.github/actions/tg-notify
+        with:
+          service: react
+          job-status: ${{ job.status }}
+          bot-token: ${{ secrets.BOT_TOKEN }}
+          chat-id: ${{ secrets.CHAT_ID }}
