@@ -74,7 +74,6 @@ export function UserCreatePage() {
             setError(result.message);
         } else {
             setCreatedUserId(result.id);
-            // setTimeout(() => navigate("/users"), 1200);
         }
     };
 

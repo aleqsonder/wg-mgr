@@ -4,7 +4,7 @@ import { vi } from "vitest";
 import type { Mock } from "vitest";
 
 import { UserPage } from "./UserPage";
-import { fetchUserById } from "../api/usersApi";
+import {editUser, fetchUserById} from "../api/usersApi";
 import { useNavigate, useParams } from "react-router-dom";
 
 vi.mock("../api/usersApi");
@@ -98,4 +98,91 @@ describe("UserPage", () => {
             expect(fetchUserById).toHaveBeenCalled();
         });
     });
+
+    it("переходит в режим редактирования и показывает input", async () => {
+        (fetchUserById as Mock).mockResolvedValue({
+            id: 1,
+            username: "Alice",
+            contacts: [],
+        });
+
+        render(<UserPage />);
+
+        const editButton = await screen.findByText("Edit");
+        await userEvent.click(editButton);
+
+        expect(screen.getByDisplayValue("Alice")).toBeInTheDocument();
+    });
+
+    it("меняет имя пользователя в input", async () => {
+        (fetchUserById as Mock).mockResolvedValue({
+            id: 1,
+            username: "Alice",
+            contacts: [],
+        });
+
+        render(<UserPage />);
+
+        const editButton = await screen.findByText("Edit");
+        await userEvent.click(editButton);
+
+        const input = screen.getByDisplayValue("Alice");
+        await userEvent.clear(input);
+        await userEvent.type(input, "Bob");
+
+        expect(input).toHaveValue("Bob");
+    });
+
+    it("сохраняет изменения и выходит из режима редактирования", async () => {
+        (fetchUserById as Mock).mockResolvedValue({
+            id: 1,
+            username: "Alice",
+            contacts: [],
+        });
+
+        const mockEdit = vi.fn().mockResolvedValue({
+            id: 1,
+            username: "Bob",
+            contacts: [],
+        });
+        (editUser as Mock).mockImplementation(mockEdit);
+
+        render(<UserPage />);
+
+        const editButton = await screen.findByText("Edit");
+        await userEvent.click(editButton);
+
+        const input = screen.getByDisplayValue("Alice");
+        await userEvent.clear(input);
+        await userEvent.type(input, "Bob");
+
+        const saveButton = screen.getByText("Save");
+        await userEvent.click(saveButton);
+
+        expect(mockEdit).toHaveBeenCalledWith(1, {
+            username: "Bob",
+            contacts: [],
+        });
+
+        expect(await screen.findByText("Bob")).toBeInTheDocument();
+    });
+
+    it("отменяет редактирование", async () => {
+        (fetchUserById as Mock).mockResolvedValue({
+            id: 1,
+            username: "Alice",
+            contacts: [],
+        });
+
+        render(<UserPage />);
+
+        const editButton = await screen.findByText("Edit");
+        await userEvent.click(editButton);
+
+        const cancelButton = screen.getByText("Cancel");
+        await userEvent.click(cancelButton);
+
+        expect(screen.getByText("Alice")).toBeInTheDocument();
+    });
+
 });
