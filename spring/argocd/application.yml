@@ -10,6 +10,7 @@ spec:
     targetRevision: main
     path: spring/k8s
     directory:
+      exclude: "*.template.yml"
       include: "*.yml"
   destination:
     server: https://kubernetes.default.svc
