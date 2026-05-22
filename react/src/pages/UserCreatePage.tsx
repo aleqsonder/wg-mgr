@@ -56,7 +56,7 @@ export function UserCreatePage() {
         setForm({ ...form, contacts: updated });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
 
         setError(null);
@@ -71,16 +71,13 @@ export function UserCreatePage() {
         const result = await createUser(form);
 
         if ("code" in result) {
-            // Ошибка от сервера
             setError(result.message);
         } else {
-            // Успех — сервер вернул UserResponse
             setCreatedUserId(result.id);
-
-            // Через секунду возвращаемся к списку
-            //setTimeout(() => navigate("/users"), 1200);
+            // setTimeout(() => navigate("/users"), 1200);
         }
     };
+
 
     return (
         <div className={styles.wrapper}>

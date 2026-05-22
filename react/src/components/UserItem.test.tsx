@@ -39,5 +39,6 @@ describe("UserItem", () => {
         const item = screen.getByText("Alice");
         await userEvent.click(item);
 
+        expect(screen.getByText("Alice")).toBeInTheDocument();
     });
 });
