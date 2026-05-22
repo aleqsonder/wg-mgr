@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>wg.mgr</groupId>
-    <artifactId>backend</artifactId>
+    <artifactId>wg-mgr_spring</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>backend</name>
-    <description>backend</description>
+    <name>wg-mgr_spring</name>
+    <description>Spring-based backend service for wg-mgr</description>
     <url/>
     <licenses>
         <license/>
